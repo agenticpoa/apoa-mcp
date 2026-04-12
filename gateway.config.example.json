@@ -1,0 +1,18 @@
+{
+  "port": 3100,
+  "upstream": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp/sandbox"]
+  },
+  "toolMappings": [
+    { "tool": "read_file", "service": "filesystem", "scope": "files:read" },
+    { "tool": "write_file", "service": "filesystem", "scope": "files:write" },
+    { "tool": "list_directory", "service": "filesystem", "scope": "files:read" },
+    { "tool": "search_files", "service": "filesystem", "scope": "files:search" },
+    { "tool": "create_directory", "service": "filesystem", "scope": "files:create" }
+  ],
+  "denyUnmapped": true,
+  "dbPath": "./gateway.db",
+  "clockSkewSeconds": 30
+}
