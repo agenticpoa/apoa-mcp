@@ -1,3 +1,5 @@
+[![APOA on MCP](assets/banner.jpg)](https://github.com/agenticpoa/apoa)
+
 # @apoa/mcp
 
 APOA authorization for [MCP](https://modelcontextprotocol.io) servers. Per-tool-call scoping, delegation chains, audit trails.
