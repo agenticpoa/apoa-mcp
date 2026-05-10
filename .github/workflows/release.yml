@@ -42,8 +42,11 @@ jobs:
 
       - name: Upgrade npm CLI for OIDC trusted publishing
         # Trusted Publishing landed in npm 11.5.1 (Sept 2025). Node 22 LTS
-        # ships with npm 10.x; bump to latest before publish.
-        run: npm install -g npm@latest
+        # ships with npm 10.x; bump to a known-good 11.x. We pin instead of
+        # using `npm@latest` because some recent latest releases ship with
+        # an inconsistent dependency tree (e.g. `promise-retry` not found),
+        # which breaks the self-upgrade mid-flight.
+        run: npm install -g npm@11.6.2
 
       - name: Verify tag matches package.json version
         run: |
