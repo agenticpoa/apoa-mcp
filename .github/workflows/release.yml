@@ -1,0 +1,87 @@
+name: Release
+
+# Triggered by version tags (e.g. v0.1.1). Builds, tests, publishes
+# @apoa/mcp to npm via OIDC Trusted Publisher (no NPM_TOKEN), and
+# creates a GitHub Release with notes from the matching CHANGELOG.md
+# section.
+#
+# Required one-time setup:
+#   npm: configure a Trusted Publisher for `@apoa/mcp` pointing to this
+#        repo + workflow file (`release.yml`). No environment, no token.
+#        https://docs.npmjs.com/trusted-publishers
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # create GitHub Releases
+  id-token: write   # OIDC for npm Trusted Publisher and provenance
+
+jobs:
+  publish:
+    name: Publish @apoa/mcp to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm CLI for OIDC trusted publishing
+        # Trusted Publishing landed in npm 11.5.1 (Sept 2025). Node 22 LTS
+        # ships with npm 10.x; bump to latest before publish.
+        run: npm install -g npm@latest
+
+      - name: Verify tag matches package.json version
+        run: |
+          pkg_version=$(node -p "require('./package.json').version")
+          if [[ "$pkg_version" != "${{ steps.ver.outputs.version }}" ]]; then
+            echo "::error::tag version ${{ steps.ver.outputs.version }} does not match package.json version $pkg_version"
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm test
+      - run: pnpm run build
+
+      - name: Publish to npm via OIDC Trusted Publisher (with provenance)
+        run: npm publish --provenance --access public
+
+      - name: Extract release notes
+        id: notes
+        run: |
+          {
+            echo 'body<<NOTES_EOF'
+            awk -v ver="${{ steps.ver.outputs.version }}" '
+              /^## / {
+                if (in_section) exit
+                if ($0 ~ ("^## " ver "([^0-9]|$)")) { in_section = 1; next }
+              }
+              /^---$/ { if (in_section) next }
+              in_section { print }
+            ' CHANGELOG.md | awk '
+              /^$/ { if (!seen) next; blanks = blanks "\n"; next }
+              { seen = 1; printf "%s%s\n", blanks, $0; blanks = "" }
+            '
+            echo 'NOTES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: '@apoa/mcp ${{ steps.ver.outputs.version }}'
+          body: ${{ steps.notes.outputs.body }}

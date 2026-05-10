@@ -1,7 +1,7 @@
 {
   "name": "@apoa/mcp",
-  "version": "0.1.0",
-  "description": "APOA authorization for MCP servers — per-tool-call scoping, delegation chains, audit trails",
+  "version": "0.1.1",
+  "description": "APOA authorization for MCP servers \u2014 per-tool-call scoping, delegation chains, audit trails",
   "type": "module",
   "main": "dist/lib.js",
   "types": "dist/lib.d.ts",
@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/agenticpoa/apoa-mcp#readme",
   "dependencies": {
-    "@apoa/core": "^0.1.0",
+    "@apoa/core": "^0.2.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "better-sqlite3": "^11.0.0",
     "jose": "^6.0.0",
