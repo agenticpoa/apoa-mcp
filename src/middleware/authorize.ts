@@ -11,14 +11,8 @@
 import * as jose from 'jose';
 import {
   matchScope,
-  checkScope,
-  checkConstraint,
   authorize as apoaAuthorize,
-  validateToken,
-  verifyChain,
   type APOAToken,
-  type ScopeCheckResult,
-  type AuthorizationResult as APOAAuthorizationResult,
 } from '@apoa/core';
 import type { ToolMapping, GatewayConfig } from '../config/schema.js';
 import type { RevocationStore, AuditStore, AuditEntry, ReplayStore } from '../stores/types.js';
@@ -161,13 +155,7 @@ export async function authorizeToolCall(
   }
 
   // 4. Check revocation (including delegation chain ancestors)
-  const delegationChain = definition.delegationChain as Array<{ parentTokenId: string }> | undefined;
-  const tokenIdsToCheck = [tokenId];
-  if (delegationChain) {
-    for (const link of delegationChain) {
-      tokenIdsToCheck.push(link.parentTokenId);
-    }
-  }
+  const tokenIdsToCheck = [tokenId, ...getDelegationAncestorIds(definition)];
 
   const revRecord = ctx.revocationStore.checkAny
     ? await ctx.revocationStore.checkAny(tokenIdsToCheck)
@@ -339,6 +327,34 @@ function verifyChainLink(
   }
 
   return { valid: true };
+}
+
+function getDelegationAncestorIds(definition: {
+  parentToken?: unknown;
+  delegationChain?: unknown;
+}): string[] {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+
+  const push = (value: unknown): void => {
+    if (typeof value !== 'string' || value.length === 0 || seen.has(value)) return;
+    seen.add(value);
+    ids.push(value);
+  };
+
+  push(definition.parentToken);
+
+  if (Array.isArray(definition.delegationChain)) {
+    for (const link of definition.delegationChain) {
+      if (typeof link === 'string') {
+        push(link);
+      } else if (link && typeof link === 'object') {
+        push((link as { parentTokenId?: unknown }).parentTokenId);
+      }
+    }
+  }
+
+  return ids;
 }
 
 async function logAudit(

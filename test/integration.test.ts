@@ -62,6 +62,7 @@ async function createToken(
     services?: Array<{ service: string; scopes: string[]; constraints?: Record<string, unknown> }>;
     rules?: Array<{ id: string; enforcement: string; description: string }>;
     exp?: number;
+    parentToken?: string;
     delegationChain?: unknown[];
   } = {}
 ): Promise<string> {
@@ -75,6 +76,7 @@ async function createToken(
         { service: 'filesystem', scopes: ['files:read', 'files:write'] },
       ],
       rules: opts.rules,
+      parentToken: opts.parentToken,
       delegationChain: opts.delegationChain,
     },
   })
@@ -567,6 +569,38 @@ describe('Gateway integration', () => {
         { _meta: { apoa_token: token } },
         ctx
       );
+      expect(decision.authorized).toBe(false);
+      expect(decision.reason).toContain('revoked');
+      expect(decision.reason).toContain('ancestor');
+    });
+
+    it('denies child when canonical parentToken is revoked', async () => {
+      const token = await createToken(keys.privateKey, {
+        services: [{ service: 'filesystem', scopes: ['files:read'] }],
+        parentToken: 'canonical-parent-tok',
+      });
+
+      await revocationStore.add({
+        tokenId: 'canonical-parent-tok',
+        revokedAt: new Date(),
+        revokedBy: 'principal:admin',
+        reason: 'Revoked parent',
+        cascaded: [],
+      });
+
+      const ctx: AuthorizationContext = {
+        config: testConfig,
+        revocationStore,
+        auditStore,
+        publicKey: keys.publicKey,
+      };
+
+      const decision = await authorizeToolCall(
+        'read_file',
+        { _meta: { apoa_token: token } },
+        ctx
+      );
+
       expect(decision.authorized).toBe(false);
       expect(decision.reason).toContain('revoked');
       expect(decision.reason).toContain('ancestor');
