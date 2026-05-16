@@ -156,5 +156,5 @@ Apache-2.0
 ## Part of the APOA Standard
 
 - [APOA Spec](https://github.com/agenticpoa/apoa/blob/main/SPEC.md)
-- [@apoa/core](https://github.com/agenticpoa/apoa/tree/main/sdk) (TypeScript SDK)
+- [@apoa/core](https://github.com/agenticpoa/apoa/tree/main/sdks/typescript) (TypeScript SDK)
 - [apoa](https://pypi.org/project/apoa/) (Python SDK)
