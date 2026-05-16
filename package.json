@@ -1,6 +1,6 @@
 {
   "name": "@apoa/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "APOA authorization for MCP servers \u2014 per-tool-call scoping, delegation chains, audit trails",
   "type": "module",
   "main": "dist/lib.js",

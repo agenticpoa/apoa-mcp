@@ -10,6 +10,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ---
 
+## 0.1.2 — 2026-05-16
+
+### Fixed
+
+- Include canonical `definition.parentToken` ancestors in revocation checks, in addition to transport `definition.delegationChain` snapshots. This ensures a revoked parent token denies delegated MCP child tool calls when the chain is represented using the core SDK's canonical `parentToken` field.
+- Fix the stale README link for the TypeScript SDK source path.
+
+### Added
+
+- Regression coverage for canonical parent-token cascade revocation.
+
+---
+
 ## 0.1.1 — 2026-05-10
 
 ### Changed
