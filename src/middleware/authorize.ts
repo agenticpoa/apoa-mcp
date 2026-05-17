@@ -10,6 +10,7 @@
 
 import * as jose from 'jose';
 import {
+  getDelegationAncestorIds,
   matchScope,
   authorize as apoaAuthorize,
   type APOAToken,
@@ -327,34 +328,6 @@ function verifyChainLink(
   }
 
   return { valid: true };
-}
-
-function getDelegationAncestorIds(definition: {
-  parentToken?: unknown;
-  delegationChain?: unknown;
-}): string[] {
-  const ids: string[] = [];
-  const seen = new Set<string>();
-
-  const push = (value: unknown): void => {
-    if (typeof value !== 'string' || value.length === 0 || seen.has(value)) return;
-    seen.add(value);
-    ids.push(value);
-  };
-
-  push(definition.parentToken);
-
-  if (Array.isArray(definition.delegationChain)) {
-    for (const link of definition.delegationChain) {
-      if (typeof link === 'string') {
-        push(link);
-      } else if (link && typeof link === 'object') {
-        push((link as { parentTokenId?: unknown }).parentTokenId);
-      }
-    }
-  }
-
-  return ids;
 }
 
 async function logAudit(
