@@ -24,6 +24,7 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm rebuild better-sqlite3 esbuild
       - run: pnpm run typecheck
       - run: pnpm test
       - run: pnpm run build
