@@ -22,7 +22,20 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
-          cache: pnpm
+      # Scope the pnpm store cache per Node version. setup-node's built-in
+      # `cache: pnpm` keys on the lockfile hash only, so the matrix jobs would
+      # share one store and pnpm's side-effects cache could serve a
+      # better-sqlite3 binary built for the other Node ABI ("Module did not
+      # self-register"). A node-scoped key keeps each ABI's build separate.
+      - name: Get pnpm store path
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-node${{ matrix.node }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-node${{ matrix.node }}-
       - run: pnpm install --frozen-lockfile
       - run: pnpm rebuild better-sqlite3 esbuild
       - run: pnpm run typecheck
