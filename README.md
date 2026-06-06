@@ -53,7 +53,24 @@ The token is stripped before reaching the tool handler -- the tool never sees it
 
 ## Passing Tokens
 
-MCP clients include the APOA token in the `_meta` field:
+MCP clients include an APOA token in the `_meta` field on each tool call:
+
+```typescript
+import { APOA, generateKeyPair } from '@apoa/core';
+
+const keys = await generateKeyPair();
+const apoa = new APOA({ privateKey: keys.privateKey });
+
+const grant = await apoa.tokens.createGrant({
+  principal: 'did:apoa:alice',
+  agent: 'did:apoa:research-agent',
+  service: 'filesystem',
+  scopes: ['files:read'],
+  expiresIn: '1h',
+});
+```
+
+Pass `grant.raw` as `_meta.apoa_token`:
 
 ```json
 {
@@ -63,11 +80,22 @@ MCP clients include the APOA token in the `_meta` field:
     "arguments": {
       "path": "/tmp/test.txt",
       "_meta": {
-        "apoa_token": "eyJhbGciOiJFZERTQSIs..."
+        "apoa_token": "<grant.raw>"
       }
     }
   }
 }
+```
+
+On the MCP server side, configure `withAPOA()` with the matching public key:
+
+```typescript
+withAPOA(server, {
+  key: keys.publicKey,
+  mappings: {
+    read_file: 'filesystem:files:read',
+  },
+});
 ```
 
 ## Tool Mappings
