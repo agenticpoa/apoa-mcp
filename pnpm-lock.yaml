@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@apoa/core':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.3
+        version: 0.2.3
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.0
         version: 1.29.0(zod@3.25.76)
@@ -45,8 +45,8 @@ importers:
 
 packages:
 
-  '@apoa/core@0.2.1':
-    resolution: {integrity: sha512-XGV9AhGDu36arQTvw669lfoxLYXsDOvDFQXV8DrfI7GuU4hNWbHN/T3vY6lAs4Q+RZI/9Qi0zv8WupGNrK4lqQ==}
+  '@apoa/core@0.2.3':
+    resolution: {integrity: sha512-hpWCFnTw8vdIKcrUjPQR1B7d/frmyuALnL0P4lxR5fM57ylTRwoz0nf5FiO9GFE/V04WPmamk9QgQv2aMGF2WA==}
     engines: {node: '>=20'}
 
   '@esbuild/aix-ppc64@0.27.7':
@@ -1240,7 +1240,7 @@ packages:
 
 snapshots:
 
-  '@apoa/core@0.2.1':
+  '@apoa/core@0.2.3':
     dependencies:
       jose: 6.2.2
 

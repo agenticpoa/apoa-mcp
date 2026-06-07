@@ -48,7 +48,7 @@
   },
   "homepage": "https://github.com/agenticpoa/apoa-mcp#readme",
   "dependencies": {
-    "@apoa/core": "^0.2.1",
+    "@apoa/core": "^0.2.3",
     "@modelcontextprotocol/sdk": "^1.12.0",
     "better-sqlite3": "^11.0.0",
     "jose": "^6.0.0",
