@@ -62,7 +62,19 @@ jobs:
       - run: pnpm test
       - run: pnpm run build
 
+      - name: Check whether version is already on npm
+        id: published
+        run: |
+          pkg_name=$(node -p "require('./package.json').name")
+          if npm view "$pkg_name@${{ steps.ver.outputs.version }}" version --silent >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "$pkg_name@${{ steps.ver.outputs.version }} is already published; skipping npm publish."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm via OIDC Trusted Publisher (with provenance)
+        if: steps.published.outputs.exists != 'true'
         run: npm publish --provenance --access public
 
       - name: Extract release notes
